@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+  <rdf:Description rdf:about="http://apweb.info/swdata/phenotypes.rdf">
+    <ns1:modified xmlns:ns1="http://purl.org/dc/terms/">2012-01-17</ns1:modified>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://apweb.info/sw/tax/celastrales">
+    <ns2:hasApomorphy xmlns:ns2="http://apweb.info/sw/ont/" rdf:resource="http://apweb.info/sw/phe/StipulesPresent"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://apweb.info/sw/tax/lepidobotryaceae">
+    <ns3:hasApomorphy xmlns:ns3="http://apweb.info/sw/ont/" rdf:resource="http://apweb.info/sw/phe/Dioecious"/>
+    <ns4:hasApomorphy xmlns:ns4="http://apweb.info/sw/ont/" rdf:resource="http://apweb.info/sw/phe/HabitTree"/>
+    <ns5:hasApomorphy xmlns:ns5="http://apweb.info/sw/ont/" rdf:resource="http://apweb.info/sw/phe/LeavesTwoRanked"/>
+  </rdf:Description>
+</rdf:RDF>

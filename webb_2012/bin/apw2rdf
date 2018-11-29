@@ -1,0 +1,70 @@
+#!/usr/bin/gawk -f
+
+BEGIN{
+
+  # config
+  runas = "local" ;
+
+  user["local"] = "cam" ;
+  pw["local"] = "..." ;
+  user["server"] = "apweb" ;
+  pw["server"] = "..." ;
+  
+  # Temporary directory
+  "mktemp -d" | getline TEMPDIR ;
+  print TEMPDIR;
+
+  SRCPAGES = "http://localhost/~cam/apweb.info/tmp/celastralesweb.html" ;
+  split(SRCPAGES, srcpages, "|");
+  for (i in srcpages)
+	{
+	  # get the raw page
+	  system("curl \"" srcpages[i] "\" > " TEMPDIR "/raw.html") ;
+
+	  # clean it up
+	  # Used `tidy --numeric-entities yes' but then switched to recode
+	  system("/usr/bin/tidy -q --doctype omit -asxhtml " TEMPDIR "/raw.html | gawk 'BEGIN{RS=\"\\x04\"}{gsub(/\\n/,\" \"); gsub(/\\ +/,\" \"); gsub(/\\|/,\"\"); print $0}' > " TEMPDIR "/clean.xhtml") ;
+	  # HTML entities to UFT
+	  system("recode -d h4..u8 " TEMPDIR "/clean.xhtml") ;
+
+	  # Extract data
+	  system("/usr/bin/xqilla -i " TEMPDIR "/clean.xhtml ./apwebdata.xq >> " TEMPDIR "/data.csv");
+	  system("/usr/bin/xqilla -i " TEMPDIR "/clean.xhtml ./apwebapo.xq >> " TEMPDIR "/apo.csv");
+	}
+
+  # Build char db:
+  system("echo 'SELECT parse.phrase, phenotype.name FROM parse, phenotype WHERE parse.phenotypeID = phenotype.id' | mysql -u " user[runas] " -p" pw[runas] " apwebchars | sed 's/\t/|/g' > " TEMPDIR "/parse.csv") ;
+
+  RS = "\n"; FS="|";
+  while ((getline < (TEMPDIR "/parse.csv")) > 0)
+	{
+	  char[$1] = $2;
+	}
+  close(TEMPDIR "/parse.csv");
+
+  # Generate apomorphies
+  rdf = "<http://apweb.info/swdata/apweb.rdf> <http://purl.org/dc/terms/modified> \"" strftime("%Y-%m-%d") "\" .\n" ;
+  while ((getline < (TEMPDIR "/apo.csv")) > 0)
+	{
+	  if (char[$2] != "") rdf = rdf "<http://apweb.info/sw/tax/" $1 "> <http://apweb.info/sw/ont/hasApomorphy> <http://apweb.info/sw/phe/" char[$2] "> .\n";
+	}
+  close(TEMPDIR "/apo.csv");
+
+  # Build data notes
+  T = "|nGenera|nSpecies|distribution|taxonRelationships|evolution|phylogenetics|synonyms|morphology";
+  split(T,t,"|");
+  while ((getline < (TEMPDIR "/data.csv")) > 0)
+	{
+	  for (i = 2; i < 10; i++)
+		{
+		  if ($i != "") rdf = rdf "<http://apweb.info/sw/tax/" $1 "> <http://apweb.info/sw/ont/" t[i] "> \"\"\"" $i "\"\"\" .\n";
+		}
+	}
+  close(TEMPDIR "/data.csv");
+
+  # convert to RDF and save
+  print rdf > (TEMPDIR "/apweb.ttl");
+  system("rapper -i turtle -o rdfxml-abbrev " TEMPDIR "/apweb.ttl > ../swdata/apweb.rdf") ;
+
+  exit;
+}

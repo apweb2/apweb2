@@ -1,0 +1,37 @@
+#!/usr/bin/gawk -f
+
+BEGIN{
+
+  # config
+  runas = "local" ;
+
+  user["local"] = "cam" ;
+  pw["local"] = "..." ;
+  user["server"] = "apweb" ;
+  pw["server"] = "..." ;
+  
+  # Temporary directory
+  "mktemp -d" | getline TEMPDIR ;
+  print TEMPDIR;
+
+  SRCPAGES = "amborellalesweb2.htm|Sporing.htm|Cycadales.htm|acoralesweb.htm|alismatalesweb.htm|amborellalesweb2.htm|apialesweb.htm|aquifolialesweb2.htm|arecalesweb.htm|asparagalesweb.htm|asteralesweb.htm|austrobaileyalesweb.htm|berberidopsidalesweb.htm|brassicalesweb.htm|brunialesweb.htm|buxalesweb.htm|canellalesweb.htm|caryophyllalesweb.htm|celastralesweb.htm|ceratophyllalesweb.htm|chloranthalesweb.htm|commelinalesweb.htm|cornalesweb.htm|crossosomatalesweb.htm|cucurbitalesweb.htm|cycadales.htm|dillenialesweb.htm|dioscorealesweb.htm|dipsacalesweb.htm|ericalesweb.htm|Escalloniales.htm|fabalesweb.htm|fagalesweb.htm|garryalesweb.htm|gentianalesweb.htm|geranialesweb.htm|ginkgoales.htm|gnetales.htm|gunneralesweb.htm|huertealesweb.htm|lamialesweb.htm|lauralesweb.htm|lilialesweb.htm|magnolialesweb.htm|malpighialesweb.htm|malvalesweb.htm|myrtalesweb2.htm|nymphaealesweb.htm|oxalidalesweb.htm|pandanalesweb.htm|Paracryphiales.htm|petrosavialesweb.htm|picramnialesweb.htm|conifers.htm|piperalesweb2.htm|poalesweb.htm|protealesweb.htm|ranunculalesweb.htm|rosalesweb.htm|Sabiales.htm|santalalesweb2.htm|sapindalesweb.htm|saxifragalesweb.htm|solanalesweb.htm|trochodendralesweb.htm|vitalesweb.htm|zingiberalesweb.htm|zygophyllalesweb.htm|garryalesweb.htm|gentianalesweb.htm|arecalesweb.htm|oxalidalesweb.htm|cornalesweb.htm|garryalesweb.htm|brassicalesweb.htm|gentianalesweb.htm" ;
+  split(SRCPAGES, srcpages, "|");
+  for (i in srcpages)
+	{
+	  # get the raw page
+	  system("curl \"http://www.mobot.org/mobot/research/APweb/orders/" srcpages[i] "\" > " TEMPDIR "/raw.html") ;
+
+	  # clean it up
+	  # Used `tidy --numeric-entities yes' but then switched to recode
+	  system("/usr/bin/tidy -q --doctype omit -asxhtml " TEMPDIR "/raw.html | gawk 'BEGIN{RS=\"\\x04\"}{gsub(/\\n/,\" \"); gsub(/\\ +/,\" \"); gsub(/\\|/,\"\"); print $0}' > " TEMPDIR "/clean.xhtml") ;
+	  # HTML entities to UFT
+	  system("recode -d h4..u8 " TEMPDIR "/clean.xhtml") ;
+
+	  # Extract data
+	  system("/usr/bin/xqilla -i " TEMPDIR "/clean.xhtml ./getApoList.xq >> " TEMPDIR "/apo.csv");
+	}
+
+  system("sort " TEMPDIR "/apo.csv | uniq > TODAY_apoList");
+
+  exit;
+}
