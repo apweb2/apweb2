@@ -18,9 +18,9 @@ examination.
       [here](swdata/phenotypes.rdf)
  * Scripts
     * [Here](bin/apw2rdf) and [here](bin/getApoList) for extracting
-      data from Peter’s APweb (see documentation) and loading onto the
-      DB. Not rechecked, but should give you the gist of what’s going
-      on. Using `curl`, [tidy](https://github.com/htacg/tidy-html5/),
+      data from Peter’s APweb (see documentation). Not rechecked, but
+      should give you the gist of what’s going on. Using `curl`, `mysql`,
+      [tidy](https://github.com/htacg/tidy-html5/),
       [recode](https://github.com/rrthomas/recode),
       [xquilla](http://xqilla.sourceforge.net/homepage) to deal with
       the HTML/XML, and `rapper` (from Redland’s
