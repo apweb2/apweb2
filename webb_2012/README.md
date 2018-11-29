@@ -21,7 +21,7 @@ examination.
       data from Peter’s APweb (see documentation). Not rechecked, but
       should give you the gist of what’s going on. Using `curl`, `mysql`,
       [tidy](https://github.com/htacg/tidy-html5/),
-      [recode](https://github.com/rrthomas/recode),
+      [recode](https://github.com/pinard/Recode),
       [xquilla](http://xqilla.sourceforge.net/homepage) to deal with
       the HTML/XML, and `rapper` (from Redland’s
       [rasqal](http://librdf.org/rasqal/) to handle RDF.
