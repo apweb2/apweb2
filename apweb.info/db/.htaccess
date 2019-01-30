@@ -8,6 +8,6 @@
 
 AuthType Basic
 AuthName "Password Protected"
-AuthUserFile .pw
+AuthUserFile /home/apweb2/apweb2/apweb.info/db/.pw
 Require valid-user
 
