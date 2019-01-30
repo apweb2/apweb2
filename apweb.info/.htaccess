@@ -1,0 +1,12 @@
+<FilesMatch "\.ini$">
+Deny from all
+</FilesMatch>
+
+<FilesMatch "^\.pw$">
+Deny from all
+</FilesMatch>
+
+AuthType Basic
+AuthName "Password Protected"
+AuthUserFile .htpasswd
+Require valid-user
